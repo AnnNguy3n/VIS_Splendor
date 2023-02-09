@@ -183,7 +183,7 @@ def getValidActions(state):
     # Check úp thẻ ẩn
     if checkReserveCard:
         for i in range(3):
-            if state[272+i] == 1:
+            if state[264+i] == 1:
                 validActions[32+i] = 1
 
     # Check nếu không có action nào có thể thực hiện (bị kẹt) thì cho action bỏ lượt
