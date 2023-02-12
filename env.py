@@ -255,10 +255,11 @@ def stepEnv(action, env, lv1, lv2, lv3):
     temp_ = 15*pIdx
     pStocks = env[23+temp_:29+temp_]
     bStocks = env[0:6]
+    pPerStocks = env[29+temp_:34+temp_]
+    takenStocks = env[84:89]
 
     # Lấy nguyên liệu
     if action < 5:
-        takenStocks = env[84:89]
         takenStocks[action] += 1
         pStocks[action] += 1
         bStocks[action] -= 1
@@ -323,8 +324,6 @@ def stepEnv(action, env, lv1, lv2, lv3):
 
     # Mua thẻ
     elif action >= 5 and action < 20:
-        pPerStocks = env[29+temp_:34+temp_]
-
         if action < 17: # Mua thẻ trên bàn chơi
             posE = action + 6 # [11:23] với [5:17]
         else: # Mua thẻ úp
@@ -354,21 +353,21 @@ def stepEnv(action, env, lv1, lv2, lv3):
         pPerStocks[cardIn4[1]] += 1 # Tăng nguyên liệu vĩnh viễn
 
         # Check noble
-        if pPerStocks[cardIn4[1]] >= 3 and pPerStocks[cardIn4[1]] <= 4:
-            pos_nobles = np.full(5, 0)
-            for i in range(5):
-                nobleId = env[6+i]
-                if nobleId != -1:
-                    nobleIn4 = __NOBLE_CARD__[nobleId]
-                    price = nobleIn4[1:6]
-                    if (price <= pPerStocks).all():
-                        pos_nobles[i] = 1
+        # if pPerStocks[cardIn4[1]] >= 3 and pPerStocks[cardIn4[1]] <= 4:
+        #     pos_nobles = np.full(5, 0)
+        #     for i in range(5):
+        #         nobleId = env[6+i]
+        #         if nobleId != -1:
+        #             nobleIn4 = __NOBLE_CARD__[nobleId]
+        #             price = nobleIn4[1:6]
+        #             if (price <= pPerStocks).all():
+        #                 pos_nobles[i] = 1
 
-            if (pos_nobles == 1).any():
-                arr_noble = np.where(pos_nobles==1)[0]
-                noble_idx = arr_noble[np.random.randint(0, arr_noble.shape[0])]
-                env[6+noble_idx] = -1
-                env[34+temp_] += 3
+        #     if (pos_nobles == 1).any():
+        #         arr_noble = np.where(pos_nobles==1)[0]
+        #         noble_idx = arr_noble[np.random.randint(0, arr_noble.shape[0])]
+        #         env[6+noble_idx] = -1
+        #         env[34+temp_] += 3
 
         # Next turn
         env[83] += 1
@@ -376,6 +375,22 @@ def stepEnv(action, env, lv1, lv2, lv3):
     # 40: Bỏ qua lượt (trường hợp đặc biệt khi không thể thực hiện action nào)
     else:
         env[83] += 1
+    
+    if (takenStocks==0).all() and (pPerStocks>=3).all():
+        pos_nobles = np.full(5, 0)
+        for i in range(5):
+            nobleId = env[6+i]
+            if nobleId != -1:
+                nobleIn4 = __NOBLE_CARD__[nobleId]
+                price = nobleIn4[1:6]
+                if (price <= pPerStocks).all():
+                    pos_nobles[i] = 1
+
+        if (pos_nobles == 1).any():
+            arr_noble = np.where(pos_nobles==1)[0]
+            noble_idx = arr_noble[np.random.randint(0, arr_noble.shape[0])]
+            env[6+noble_idx] = -1
+            env[34+temp_] += 3
 
 
 def one_game(list_player, per_data):
@@ -526,12 +541,8 @@ def getReward(state):
                 min_ = np.min(playerBoughtCards)
                 if playerBoughtCards[0] > min_: # Số thẻ của bản thân nhiều hơn
                     return 0
-                else:
-                    lstChk = maxScorePlayers[np.where(playerBoughtCards==min_)[0]]
-                    if len(lstChk) == 1: # Bản thân là người duy nhất có số lượng thẻ ít nhất
-                        return 1
-                    else: # Tất cả đều thua
-                        return 0
+                else: # Tất cả đều thắng
+                    return 1
 
 
 @njit()
