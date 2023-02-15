@@ -209,7 +209,7 @@ def checkEnded(env):
     if maxScore >= 15 and env[83] % 4 == 0:
         maxScorePlayers = np.where(scoreArr==maxScore)[0]
         if len(maxScorePlayers) == 1:
-            return maxScorePlayers[0]
+            return maxScorePlayers
         else:
             playerBoughtCards = maxScorePlayers.copy()
             for i in range(maxScorePlayers.shape[0]):
@@ -219,12 +219,12 @@ def checkEnded(env):
 
             min_ = np.min(playerBoughtCards)
             winnerIdx = np.where(playerBoughtCards==min_)[0]
-            if winnerIdx.shape[0] == 1:
-                return maxScorePlayers[winnerIdx[0]]
-            else:
-                return 4
+            # if winnerIdx.shape[0] == 1:
+            return maxScorePlayers[winnerIdx]
+            # else:
+            #     return 4
     else:
-        return -1
+        return np.array([-1])
 
 
 @njit()
@@ -375,7 +375,7 @@ def stepEnv(action, env, lv1, lv2, lv3):
     # 40: Bỏ qua lượt (trường hợp đặc biệt khi không thể thực hiện action nào)
     else:
         env[83] += 1
-    
+
     if (takenStocks==0).all() and (pPerStocks>=3).all():
         pos_nobles = np.full(5, 0)
         for i in range(5):
@@ -396,7 +396,7 @@ def stepEnv(action, env, lv1, lv2, lv3):
 def one_game(list_player, per_data):
     env, lv1, lv2, lv3 = initEnv()
 
-    winner = -1
+    winner = np.array([-1])
     while env[83] < 400:
         p_idx = env[83] % 4
         state = getAgentState(env, lv1, lv2, lv3)
@@ -407,9 +407,9 @@ def one_game(list_player, per_data):
 
         stepEnv(action, env, lv1, lv2, lv3)
         winner = checkEnded(env)
-        if winner != -1:
+        if winner[0] != -1:
             break
-    
+
     env[89] = 1
     for i in range(4):
         env[83] = i
@@ -424,7 +424,7 @@ def one_game(list_player, per_data):
 def numba_one_game(p0, p1, p2, p3, per_data, p_id_order):
     env, lv1, lv2, lv3 = initEnv()
 
-    winner = -1
+    winner = np.array([-1])
     while env[83] < 400:
         p_idx = env[83] % 4
         state = getAgentState(env, lv1, lv2, lv3)
@@ -443,9 +443,9 @@ def numba_one_game(p0, p1, p2, p3, per_data, p_id_order):
 
         stepEnv(action, env, lv1, lv2, lv3)
         winner = checkEnded(env)
-        if winner != -1:
+        if winner[0] != -1:
             break
-    
+
     env[89] = 1
     for i in range(4):
         env[83] = i
@@ -467,16 +467,14 @@ def normal_main(list_player, num_game, per_data):
     if len(list_player) != 4:
         raise Exception("Cần chính xác 4 người chơi được truyền vào")
 
-    num_win = np.full(6, 0)
+    num_win = np.full(5, 0)
     p_id_order = np.arange(4)
     for _ in range(num_game):
         np.random.shuffle(p_id_order)
         temp_list_player = [list_player[i] for i in p_id_order]
         winner, per_data = one_game(temp_list_player, per_data)
 
-        if winner == -1:
-            num_win[5] += 1
-        elif winner == 4:
+        if winner[0] == -1:
             num_win[4] += 1
         else:
             num_win[p_id_order[winner]] += 1
@@ -493,9 +491,7 @@ def numba_main(p0, p1, p2, p3, num_game, per_data):
         np.random.shuffle(p_id_order)
         winner, per_data = numba_one_game(p0, p1, p2, p3, per_data, p_id_order)
 
-        if winner == -1:
-            num_win[5] += 1
-        elif winner == 4:
+        if winner[0] == -1:
             num_win[4] += 1
         else:
             num_win[p_id_order[winner]] += 1
@@ -549,7 +545,7 @@ def getReward(state):
 def one_game_numba(p0, list_other, per_player, per1, per2, per3, p1, p2, p3):
     env, lv1, lv2, lv3 = initEnv()
 
-    winner = -1
+    winner = np.array([-1])
     while env[83] < 400:
         p_idx = env[83] % 4
         state = getAgentState(env, lv1, lv2, lv3)
@@ -568,7 +564,7 @@ def one_game_numba(p0, list_other, per_player, per1, per2, per3, p1, p2, p3):
         
         stepEnv(action, env, lv1, lv2, lv3)
         winner = checkEnded(env)
-        if winner != -1:
+        if winner[0] != -1:
             break
     
     env[89] = 1
@@ -578,7 +574,7 @@ def one_game_numba(p0, list_other, per_player, per1, per2, per3, p1, p2, p3):
     state = getAgentState(env, lv1, lv2, lv3)
     action, per_player = p0(state, per_player)
 
-    if p0_idx == winner: result = 1
+    if p0_idx in winner: result = 1
     else: result = 0
     return result, per_player
 
@@ -597,7 +593,7 @@ def n_game_numba(p0, num_game, per_player, list_other, per1, per2, per3, p1, p2,
 def one_game_normal(p0, list_other, per_player, per1, per2, per3, p1, p2, p3):
     env, lv1, lv2, lv3 = initEnv()
 
-    winner = -1
+    winner = np.array([-1])
     while env[83] < 400:
         p_idx = env[83] % 4
         state = getAgentState(env, lv1, lv2, lv3)
@@ -616,7 +612,7 @@ def one_game_normal(p0, list_other, per_player, per1, per2, per3, p1, p2, p3):
         
         stepEnv(action, env, lv1, lv2, lv3)
         winner = checkEnded(env)
-        if winner != -1:
+        if winner[0] != -1:
             break
     
     env[89] = 1
@@ -626,7 +622,7 @@ def one_game_normal(p0, list_other, per_player, per1, per2, per3, p1, p2, p3):
     state = getAgentState(env, lv1, lv2, lv3)
     action, per_player = p0(state, per_player)
 
-    if p0_idx == winner: result = 1
+    if p0_idx in winner: result = 1
     else: result = 0
     return result, per_player
 
