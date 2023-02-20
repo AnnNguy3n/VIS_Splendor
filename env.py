@@ -388,7 +388,12 @@ def stepEnv(action, env, lv1, lv2, lv3):
 
         if (pos_nobles == 1).any():
             arr_noble = np.where(pos_nobles==1)[0]
-            noble_idx = arr_noble[np.random.randint(0, arr_noble.shape[0])]
+            if arr_noble.shape[0] == 1:
+                choose = 0
+            else:
+                choose = np.random.randint(0, arr_noble.shape[0])
+                
+            noble_idx = arr_noble[choose]
             env[6+noble_idx] = -1
             env[34+temp_] += 3
 
