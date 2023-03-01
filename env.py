@@ -588,6 +588,6 @@ def numba_main_2(p0, num_game, per_player, level, *args):
             per_level.append(p3.convert_to_run(data_agent_env))
 
     if check_njit:
-        return n_game_numba(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
+        return n_games_numba(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
     else:
-        return n_game_normal(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
+        return n_games_normal(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
