@@ -556,7 +556,6 @@ def one_game_numba(p0, list_other, per_player, per1, per2, per3, p1, p2, p3):
             break
 
     env[89] = 1
-
     p0_idx = np.where(list_other==-1)[0][0]
     env[83] = p0_idx
     state = getAgentState(env, lv1, lv2, lv3)
@@ -604,7 +603,6 @@ def one_game_normal(p0, list_other, per_player, per1, per2, per3, p1, p2, p3):
             break
 
     env[89] = 1
-
     p0_idx = np.where(list_other==-1)[0][0]
     env[83] = p0_idx
     state = getAgentState(env, lv1, lv2, lv3)
@@ -670,6 +668,6 @@ def numba_main_2(p0, num_game, per_player, level, *args):
         per_level.append(data_agent_env)
 
     try:
-        return n_game_numba(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
+        return n_games_numba(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
     except:
-        return n_game_normal(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
+        return n_games_normal(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
