@@ -574,9 +574,9 @@ def numba_main_2(p0, num_game, per_player, level, *args):
 
     lst_agent_level = dict_level[env_name][str(level)][2]
 
-    p1 = load_module_player(lst_agent_level[0]).Test
-    p2 = load_module_player(lst_agent_level[1]).Test
-    p3 = load_module_player(lst_agent_level[2]).Test
+    p1 = load_module_player(lst_agent_level[0])
+    p2 = load_module_player(lst_agent_level[1])
+    p3 = load_module_player(lst_agent_level[2])
     per_level = []
     for i in range(3):
         data_agent_env = np.load(f'{SHOT_PATH}Agent/{lst_agent_level[i]}/Data/{env_name}_{level}/Train.npy',allow_pickle=True)
@@ -588,6 +588,6 @@ def numba_main_2(p0, num_game, per_player, level, *args):
             per_level.append(p3.convert_to_run(data_agent_env))
 
     if check_njit:
-        return n_games_numba(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
+        return n_games_numba(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1.Test, p2.Test, p3.Test)
     else:
-        return n_games_normal(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1, p2, p3)
+        return n_games_normal(p0, num_game, per_player, list_other, per_level[0], per_level[1], per_level[2], p1.Test, p2.Test, p3.Test)
